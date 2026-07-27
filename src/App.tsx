@@ -247,6 +247,12 @@ export default function App() {
             </div>
           )}
 
+          {activeTab === 'dashboard' && (
+            <div className="animate-in fade-in duration-300 space-y-6">
+              <DashboardSummary tickets={tickets} matches={matches} />
+            </div>
+          )}
+
           {activeTab === 'news' && (
             <div className="animate-in fade-in duration-300 h-full">
               <NewsPanel matches={matches} />
@@ -276,9 +282,9 @@ export default function App() {
                 />
               </div>
               <div className="lg:col-span-8 space-y-6">
+                <DashboardSummary tickets={tickets} matches={matches} />
                 {tickets.length > 0 && (
                   <>
-                    <DashboardSummary tickets={tickets} matches={matches} />
                     <DistributionChart tickets={tickets} matches={matches} />
                     <ResultsTable tickets={tickets} matches={matches} />
                   </>

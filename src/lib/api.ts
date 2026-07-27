@@ -1,6 +1,7 @@
 import { Matchday, Match } from '../types';
 import { calculateTrueProbabilities } from './probabilities';
 import { findBestMatch } from './fuzzy';
+import { db } from './db';
 
 const SELAE_FECHAS_URL = '/api/selae/fechas';
 const SELAE_PROXIMOS_URL = '/api/selae/proximos';
@@ -10,6 +11,13 @@ import { fuseProbabilities } from './probabilities';
 export async function enrichMatchesWithNews(matches: Match[]): Promise<Match[]> {
   const enriched = [...matches];
   
+  await db.updateSourceHealth('API-Football (Bajas)', 'pending').catch(() => {});
+  await db.updateSourceHealth('FutbolFantasy (Bajas)', 'pending').catch(() => {});
+  await db.updateSourceHealth('TheSportsDB (Bajas)', 'pending').catch(() => {});
+
+  let hasError = false;
+  let lastErrorMessage = '';
+
   // To avoid hammering the API, process in chunks
   for (let i = 0; i < enriched.length; i++) {
     const m = enriched[i];
@@ -51,15 +59,29 @@ export async function enrichMatchesWithNews(matches: Match[]): Promise<Match[]> 
   
     } catch (e) {
       console.warn('Error enriching match', m.id, e);
+      hasError = true;
+      lastErrorMessage = e instanceof Error ? e.message : 'Error consultando bajas';
     }
   }
   
+  if (hasError) {
+    await db.updateSourceHealth('API-Football (Bajas)', 'error', lastErrorMessage).catch(() => {});
+    await db.updateSourceHealth('FutbolFantasy (Bajas)', 'error', lastErrorMessage).catch(() => {});
+    await db.updateSourceHealth('TheSportsDB (Bajas)', 'error', lastErrorMessage).catch(() => {});
+  } else {
+    await db.updateSourceHealth('API-Football (Bajas)', 'success').catch(() => {});
+    await db.updateSourceHealth('FutbolFantasy (Bajas)', 'success').catch(() => {});
+    await db.updateSourceHealth('TheSportsDB (Bajas)', 'success').catch(() => {});
+  }
+
   return enriched;
 }
 
 export async function fetchOddsData(): Promise<any[]> {
   let realOddsData: any[] = [];
   try {
+    await db.updateSourceHealth('The Odds API', 'pending').catch(() => {});
+    await db.updateSourceHealth('Dataradar', 'pending').catch(() => {});
     await fetch('/api/status/update', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -71,6 +93,8 @@ export async function fetchOddsData(): Promise<any[]> {
       const oddsJson = await oddsRes.json();
       if (oddsJson.success) {
         realOddsData = oddsJson.data;
+        await db.updateSourceHealth('The Odds API', 'success').catch(() => {});
+        await db.updateSourceHealth('Dataradar', 'success').catch(() => {});
         await fetch('/api/status/update', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -84,10 +108,13 @@ export async function fetchOddsData(): Promise<any[]> {
     }
   } catch (e) {
     console.warn("Could not fetch real odds", e);
+    const errMsg = e instanceof Error ? e.message : 'Error desconocido';
+    await db.updateSourceHealth('The Odds API', 'error', errMsg).catch(() => {});
+    await db.updateSourceHealth('Dataradar', 'error', errMsg).catch(() => {});
     await fetch('/api/status/update', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ source: 'The Odds API', status: 'error', error: e instanceof Error ? e.message : 'Error desconocido' })
+      body: JSON.stringify({ source: 'The Odds API', status: 'error', error: errMsg })
     }).catch(console.error);
   }
   return realOddsData;
@@ -96,6 +123,7 @@ export async function fetchOddsData(): Promise<any[]> {
 export async function fetchSELAEData(): Promise<Matchday[]> {
   try {
     const matchdays: Matchday[] = [];
+    await db.updateSourceHealth('SELAE (Próximos)', 'pending').catch(() => {});
     
     // 0. Fetch real odds from The Odds API (direct client-side or via proxy)
     let realOddsData: any[] = await fetchOddsData();
@@ -106,13 +134,16 @@ export async function fetchSELAEData(): Promise<Matchday[]> {
     });
     
     if (!proximosRes.ok) {
-      throw new Error(`Error de SELAE: ${proximosRes.status}`);
+      const errMsg = `Error de SELAE: ${proximosRes.status}`;
+      await db.updateSourceHealth('SELAE (Próximos)', 'error', errMsg).catch(() => {});
+      throw new Error(errMsg);
     }
     
     const proximosData = await proximosRes.json();
     let currentSorteoDate = '';
 
     if (proximosData && proximosData.length > 0) {
+      await db.updateSourceHealth('SELAE (Próximos)', 'success').catch(() => {});
       const activeData = proximosData[0];
       currentSorteoDate = activeData.fecha_sorteo || activeData.fecha;
       

@@ -1,7 +1,7 @@
 import React from 'react';
-import { LayoutGrid, Newspaper, Settings, Calculator, Activity } from 'lucide-react';
+import { LayoutGrid, BarChart2, Newspaper, Settings, Calculator, Activity } from 'lucide-react';
 
-export type TabId = 'general' | 'news' | 'config' | 'generate' | 'sources';
+export type TabId = 'general' | 'dashboard' | 'news' | 'config' | 'generate' | 'sources';
 
 interface TabsHeaderProps {
   activeTab: TabId;
@@ -11,6 +11,7 @@ interface TabsHeaderProps {
 export function TabsHeader({ activeTab, onTabChange }: TabsHeaderProps) {
   const tabs = [
     { id: 'general', label: 'Panel General', icon: LayoutGrid },
+    { id: 'dashboard', label: 'Dashboard EV+', icon: BarChart2 },
     { id: 'news', label: 'Noticias y Bajas', icon: Newspaper },
     { id: 'config', label: 'Configuración', icon: Settings },
     { id: 'generate', label: 'Generación', icon: Calculator },
