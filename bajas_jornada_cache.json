@@ -1,0 +1,14 @@
+{
+  "Alavés": {
+    "timestamp": 1785158668803,
+    "data": {
+      "equipo": "Alavés",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  }
+}

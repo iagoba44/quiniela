@@ -1,0 +1,6 @@
+{
+  "name": "La Quiniela Optimizer",
+  "description": "Herramienta avanzada para el análisis, reducción y optimización de boletos de La Quiniela.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
