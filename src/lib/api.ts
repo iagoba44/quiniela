@@ -18,16 +18,33 @@ export async function enrichMatchesWithNews(matches: Match[]): Promise<Match[]> 
   let hasError = false;
   let lastErrorMessage = '';
 
-  // To avoid hammering the API, process in chunks
+  // LEAGUE-WIDE optimization: 1 API call for all teams instead of 30 individual
+  let allBajasCache: Record<string, any> = {};
+  try {
+    const leagueRes = await fetch('/api/bajas/liga');
+    if (leagueRes.ok) {
+      const leagueData = await leagueRes.json();
+      if (leagueData.success) {
+        allBajasCache = leagueData.equipos || {};
+      }
+    }
+  } catch (e) {}
+
   for (let i = 0; i < enriched.length; i++) {
     const m = enriched[i];
     
     try {
-      const resHome = await fetch(`/api/bajas/${encodeURIComponent(m.homeTeam)}`);
-      const dataHome = await resHome.json();
-      
-      const resAway = await fetch(`/api/bajas/${encodeURIComponent(m.awayTeam)}`);
-      const dataAway = await resAway.json();
+      let dataHome: any = allBajasCache[m.homeTeam] || null;
+      let dataAway: any = allBajasCache[m.awayTeam] || null;
+
+      if (!dataHome) {
+        const resHome = await fetch(`/api/bajas/${encodeURIComponent(m.homeTeam)}`);
+        dataHome = await resHome.json();
+      }
+      if (!dataAway) {
+        const resAway = await fetch(`/api/bajas/${encodeURIComponent(m.awayTeam)}`);
+        dataAway = await resAway.json();
+      }
       
       m.bajasHome = { 
         confirmadas: dataHome.bajas_confirmadas || [], 
