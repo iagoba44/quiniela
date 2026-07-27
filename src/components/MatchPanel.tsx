@@ -59,15 +59,41 @@ export const MatchPanel: React.FC<Props> = ({ matches, updateMatch }) => {
                 <td className="px-4 py-3 font-medium text-slate-800">
                   <div className="flex items-center gap-2">
                     <span className="flex-1 text-right">{match.homeTeam}</span>
-                    {(match.bajasHome?.confirmadas?.length || 0) + (match.bajasHome?.sancionados?.length || 0) > 0 ? (
-                      <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-bold" title="Bajas afectan cuotas">-{Math.min(8, ((match.bajasHome?.confirmadas?.length || 0) + (match.bajasHome?.sancionados?.length || 0)) * 1.5).toFixed(1)}%</span>
+                    {match.impactoBajasHome && match.impactoBajasHome < 0 ? (
+                      <span className="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-bold" title="Penalización por bajas local">
+                        ▾{(Math.abs(match.impactoBajasHome) * 100).toFixed(1)}%
+                      </span>
+                    ) : (match.bajasHome?.confirmadas?.length || 0) + (match.bajasHome?.sancionados?.length || 0) > 0 ? (
+                      <span className="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-bold" title="Bajas afectan cuotas">
+                        ▾{Math.min(8, ((match.bajasHome?.confirmadas?.length || 0) + (match.bajasHome?.sancionados?.length || 0)) * 1.5).toFixed(1)}%
+                      </span>
                     ) : null}
                     <span className="text-slate-400">-</span>
-                    {(match.bajasAway?.confirmadas?.length || 0) + (match.bajasAway?.sancionados?.length || 0) > 0 ? (
-                      <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-bold" title="Bajas afectan cuotas">-{Math.min(8, ((match.bajasAway?.confirmadas?.length || 0) + (match.bajasAway?.sancionados?.length || 0)) * 1.5).toFixed(1)}%</span>
+                    {match.impactoBajasAway && match.impactoBajasAway < 0 ? (
+                      <span className="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-bold" title="Penalización por bajas visitante">
+                        ▾{(Math.abs(match.impactoBajasAway) * 100).toFixed(1)}%
+                      </span>
+                    ) : (match.bajasAway?.confirmadas?.length || 0) + (match.bajasAway?.sancionados?.length || 0) > 0 ? (
+                      <span className="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-bold" title="Bajas afectan cuotas">
+                        ▾{Math.min(8, ((match.bajasAway?.confirmadas?.length || 0) + (match.bajasAway?.sancionados?.length || 0)) * 1.5).toFixed(1)}%
+                      </span>
                     ) : null}
                     <span className="flex-1">{match.awayTeam}</span>
                   </div>
+                  {(match.fragilityFlagsHome || match.fragilityFlagsAway) && (
+                    <div className="flex gap-1 mt-1 justify-center">
+                      {match.fragilityFlagsHome?.map((flag, idx) => (
+                        <span key={`h-${idx}`} className="text-[9px] bg-amber-100 text-amber-800 px-1 rounded font-semibold">
+                          L: {flag}
+                        </span>
+                      ))}
+                      {match.fragilityFlagsAway?.map((flag, idx) => (
+                        <span key={`a-${idx}`} className="text-[9px] bg-amber-100 text-amber-800 px-1 rounded font-semibold">
+                          V: {flag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </td>
                 
                 {/* Cuotas Editables */}

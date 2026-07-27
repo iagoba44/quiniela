@@ -24,22 +24,39 @@ interface QuinielaDB extends DBSchema {
     key: string;
     value: SourceHealth;
   };
+  alerts: {
+    key: string;
+    value: any;
+  };
 }
 
 let dbPromise: Promise<IDBPDatabase<QuinielaDB>> | null = null;
 
 if (typeof window !== 'undefined') {
-  dbPromise = openDB<QuinielaDB>('quiniela-db', 1, {
-    upgrade(db) {
+  dbPromise = openDB<QuinielaDB>('quiniela-db', 2, {
+    upgrade(db, oldVersion) {
       if (!db.objectStoreNames.contains('bajas')) db.createObjectStore('bajas');
       if (!db.objectStoreNames.contains('cuotas')) db.createObjectStore('cuotas');
       if (!db.objectStoreNames.contains('historico')) db.createObjectStore('historico');
       if (!db.objectStoreNames.contains('sourceHealth')) db.createObjectStore('sourceHealth');
+      if (!db.objectStoreNames.contains('alerts')) db.createObjectStore('alerts');
     },
   });
 }
 
 export const db = {
+  // Almacenamiento de alertas
+  async saveAlert(alert: any) {
+    const dbInstance = await dbPromise;
+    if (!dbInstance) return;
+    await dbInstance.put('alerts', alert, alert.id);
+  },
+  async getAlerts() {
+    const dbInstance = await dbPromise;
+    if (!dbInstance) return [];
+    return await dbInstance.getAll('alerts');
+  },
+
   // Almacenamiento de bajas y lesiones
   async saveBajas(equipo: string, data: any) {
     const dbInstance = await dbPromise;

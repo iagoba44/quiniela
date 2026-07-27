@@ -35,6 +35,7 @@ export const ConfigPanel: React.FC<Props> = ({ settings, setSettings, onGenerate
                 <option value="ev">Esperanza Matemática (EV Pura)</option>
                 <option value="montecarlo">Cobertura Probabilística (Monte Carlo)</option>
                 <option value="filters">Filtros Estadísticos (Condicionada)</option>
+                <option value="condorcet">Cobertura Condicionada (Condorcet)</option>
               </select>
               <RefreshCw className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
             </div>
@@ -132,6 +133,30 @@ export const ConfigPanel: React.FC<Props> = ({ settings, setSettings, onGenerate
                   onChange={(e) => handleChange('max2', parseInt(e.target.value))}
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">Filtro Anti-Favoritos (Máx "1"s)</label>
+              <input
+                type="number"
+                min="1" max="15"
+                placeholder="Ej: 10"
+                className="w-full px-2 py-1 text-sm border border-slate-200 rounded"
+                value={settings.maxHomeOnes || ''}
+                onChange={(e) => handleChange('maxHomeOnes', e.target.value ? parseInt(e.target.value) : undefined)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs text-slate-500 mb-1">Bote Acumulado (€)</label>
+              <input
+                type="number"
+                step="500000"
+                placeholder="Ej: 2000000"
+                className="w-full px-2 py-1 text-sm border border-slate-200 rounded"
+                value={settings.jackpotAmount || ''}
+                onChange={(e) => handleChange('jackpotAmount', e.target.value ? parseFloat(e.target.value) : undefined)}
+              />
             </div>
           </div>
         </div>
