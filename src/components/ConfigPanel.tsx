@@ -32,6 +32,7 @@ export const ConfigPanel: React.FC<Props> = ({ settings, setSettings, onGenerate
                 onChange={(e) => handleChange('algorithm', e.target.value)}
               >
                 <option value="reduction">Reducción al 13 (Greedy Distance)</option>
+                <option value="classic">Quiniela Clásica (Dobles y Triples Directos)</option>
                 <option value="ev">Esperanza Matemática (EV Pura)</option>
                 <option value="montecarlo">Cobertura Probabilística (Monte Carlo)</option>
                 <option value="filters">Filtros Estadísticos (Condicionada)</option>
@@ -40,6 +41,60 @@ export const ConfigPanel: React.FC<Props> = ({ settings, setSettings, onGenerate
               <RefreshCw className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
             </div>
           </div>
+
+          {/* Modo Dobles y Triples para Quiniela Clásica */}
+          {(settings.algorithm === 'classic' || (settings.classicDobles !== undefined || settings.classicTriples !== undefined)) && (
+            <div className="bg-blue-50/70 p-4 rounded-xl border border-blue-200 space-y-3">
+              <div className="text-xs font-bold text-blue-900 uppercase tracking-wider flex items-center justify-between">
+                <span>Modo Dobles / Triples Directos</span>
+                <span className="bg-blue-200 text-blue-800 text-[10px] px-2 py-0.5 rounded font-bold">
+                  2<sup>{settings.classicDobles || 0}</sup> × 3<sup>{settings.classicTriples || 0}</sup> = {Math.pow(2, settings.classicDobles || 0) * Math.pow(3, settings.classicTriples || 0)} col.
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Nº Dobles Directos</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="14"
+                    className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500"
+                    value={settings.classicDobles || 0}
+                    onChange={(e) => {
+                      const dobles = parseInt(e.target.value) || 0;
+                      const triples = settings.classicTriples || 0;
+                      const calculatedBudget = Math.pow(2, dobles) * Math.pow(3, triples);
+                      setSettings({
+                        ...settings,
+                        classicDobles: dobles,
+                        budget: calculatedBudget > 0 ? calculatedBudget : settings.budget
+                      });
+                    }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Nº Triples Directos</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="14"
+                    className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500"
+                    value={settings.classicTriples || 0}
+                    onChange={(e) => {
+                      const triples = parseInt(e.target.value) || 0;
+                      const dobles = settings.classicDobles || 0;
+                      const calculatedBudget = Math.pow(2, dobles) * Math.pow(3, triples);
+                      setSettings({
+                        ...settings,
+                        classicTriples: triples,
+                        budget: calculatedBudget > 0 ? calculatedBudget : settings.budget
+                      });
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">

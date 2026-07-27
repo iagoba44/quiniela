@@ -275,6 +275,7 @@ export default function App() {
               <div className="lg:col-span-4">
                 <GenerationPanel 
                   tickets={tickets} 
+                  matches={matches}
                   isGenerating={isGenerating}
                   onGenerate={handleGenerate}
                   onDownload={handleDownload}

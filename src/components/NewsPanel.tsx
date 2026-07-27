@@ -68,35 +68,19 @@ export function NewsPanel({ matches }: NewsPanelProps) {
 
     const loadLocalAlerts = async () => {
       try {
+        const res = await fetch('/api/alerts');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.alerts) && data.alerts.length > 0) {
+            setAlerts(data.alerts);
+            data.alerts.forEach((a: AlertItem) => db.saveAlert(a));
+            return;
+          }
+        }
+        
         const saved = await db.getAlerts();
         if (saved && saved.length > 0) {
           setAlerts(saved);
-        } else {
-          // Default initial alerts
-          const sampleAlerts: AlertItem[] = [
-            {
-              id: '1',
-              playerName: 'Jude Bellingham',
-              teamName: 'Real Madrid',
-              oldStatus: 'duda',
-              newStatus: 'baja_confirmada',
-              timestamp: new Date(Date.now() - 2 * 3600 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-              source: 'Marca / RSS',
-              seen: false
-            },
-            {
-              id: '2',
-              playerName: 'Pedri',
-              teamName: 'FC Barcelona',
-              oldStatus: 'sancionado',
-              newStatus: 'recuperado',
-              timestamp: new Date(Date.now() - 5 * 3600 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-              source: 'FutbolFantasy',
-              seen: false
-            }
-          ];
-          setAlerts(sampleAlerts);
-          sampleAlerts.forEach(a => db.saveAlert(a));
         }
       } catch (e) {
         console.error('Error loading alerts:', e);

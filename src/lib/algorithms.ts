@@ -17,6 +17,77 @@ export function generateCombinations(matches: Match[], settings: TicketSettings)
     ? 1 + Math.min(0.5, settings.jackpotAmount / 5000000) 
     : 1;
 
+  // Modo Quiniela Clásica (Dobles y Triples Directos)
+  if (settings.algorithm === 'classic' || (settings.classicDobles && settings.classicDobles > 0) || (settings.classicTriples && settings.classicTriples > 0)) {
+    const doblesCount = settings.classicDobles || 0;
+    const triplesCount = settings.classicTriples || 0;
+
+    const matchUncertainties = matches.map((m, idx) => {
+      const maxP = Math.max(m.trueProbabilities['1'], m.trueProbabilities['X'], m.trueProbabilities['2']);
+      return { idx, match: m, uncertainty: 1 - maxP };
+    });
+    matchUncertainties.sort((a, b) => b.uncertainty - a.uncertainty);
+
+    const tripleSet = new Set<number>();
+    const doubleSet = new Set<number>();
+
+    matches.forEach((m, idx) => {
+      if (m.selections.length === 3) tripleSet.add(idx);
+      else if (m.selections.length === 2) doubleSet.add(idx);
+    });
+
+    for (const item of matchUncertainties) {
+      if (tripleSet.size >= triplesCount) break;
+      if (!tripleSet.has(item.idx) && !doubleSet.has(item.idx)) {
+        tripleSet.add(item.idx);
+      }
+    }
+
+    for (const item of matchUncertainties) {
+      if (doubleSet.size >= doblesCount) break;
+      if (!tripleSet.has(item.idx) && !doubleSet.has(item.idx)) {
+        doubleSet.add(item.idx);
+      }
+    }
+
+    const allowedChoicesPerMatch: Selection[][] = matches.map((m, idx) => {
+      if (tripleSet.has(idx)) {
+        return ['1', 'X', '2'];
+      }
+      if (doubleSet.has(idx)) {
+        if (m.selections.length === 2) return m.selections;
+        const sorted = (['1', 'X', '2'] as Selection[]).sort((a, b) => m.trueProbabilities[b] - m.trueProbabilities[a]);
+        return [sorted[0], sorted[1]];
+      }
+      if (m.selections.length === 1) return [m.selections[0]];
+      const sorted = (['1', 'X', '2'] as Selection[]).sort((a, b) => m.trueProbabilities[b] - m.trueProbabilities[a]);
+      return [sorted[0]];
+    });
+
+    function cartesianProduct(arrays: Selection[][]): Selection[][] {
+      return arrays.reduce<Selection[][]>(
+        (acc, curr) => acc.flatMap(d => curr.map(e => [...d, e])),
+        [[]]
+      );
+    }
+
+    const combinations = cartesianProduct(allowedChoicesPerMatch);
+    
+    return combinations.map(picks => {
+      let prob = 1;
+      picks.forEach((pick, i) => {
+        prob *= matches[i].trueProbabilities[pick];
+      });
+      const hash = picks.join('');
+      return {
+        id: hash,
+        picks,
+        probability: prob,
+        evScore: prob * jackpotMultiplier
+      };
+    }).slice(0, settings.budget || combinations.length);
+  }
+
   const generateRandomPick = (match: Match): Selection => {
     const choices = match.selections.length > 0 ? match.selections : (['1', 'X', '2'] as Selection[]);
     

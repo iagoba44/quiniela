@@ -47,14 +47,19 @@ export async function enrichMatchesWithNews(matches: Match[]): Promise<Match[]> 
       const cuotas = [m.odds['1'], m.odds['X'], m.odds['2']];
       const porcentajesLAE = m.laeProbabilities ? [m.laeProbabilities['1'], m.laeProbabilities['X'], m.laeProbabilities['2']] : [0.33, 0.33, 0.34];
 
-      const { probabilidades, ev } = fuseProbabilities(
+      const { probabilidades, probabilidadesSinBajas, impactoLocal, impactoVisitante, ev } = fuseProbabilities(
         cuotas as [number, number, number],
-        numBajasHome,
-        numBajasAway,
+        m.bajasHomeDetail || numBajasHome,
+        m.bajasAwayDetail || numBajasAway,
         porcentajesLAE as [number, number, number]
       );
       
       m.trueProbabilities = { 1: probabilidades[0], X: probabilidades[1], 2: probabilidades[2] };
+      if (probabilidadesSinBajas) {
+        m.trueProbabilitiesSinBajas = { 1: probabilidadesSinBajas[0], X: probabilidadesSinBajas[1], 2: probabilidadesSinBajas[2] };
+      }
+      m.impactoBajasHome = impactoLocal;
+      m.impactoBajasAway = impactoVisitante;
       m.ev = { 1: ev[0], X: ev[1], 2: ev[2] };
   
     } catch (e) {
@@ -197,6 +202,7 @@ export async function fetchSELAEData(): Promise<Matchday[]> {
         );
         
         const trueProbabilities = { 1: fused.probabilidades[0], X: fused.probabilidades[1], 2: fused.probabilidades[2] };
+        const trueProbabilitiesSinBajas = fused.probabilidadesSinBajas ? { 1: fused.probabilidadesSinBajas[0], X: fused.probabilidadesSinBajas[1], 2: fused.probabilidadesSinBajas[2] } : undefined;
         const ev = { 1: fused.ev[0], X: fused.ev[1], 2: fused.ev[2] };
 
         return {
@@ -208,6 +214,9 @@ export async function fetchSELAEData(): Promise<Matchday[]> {
           laeProbabilities,
           ev,
           trueProbabilities,
+          trueProbabilitiesSinBajas,
+          impactoBajasHome: fused.impactoLocal,
+          impactoBajasAway: fused.impactoVisitante,
           selections: [],
           date: p.fecha || currentSorteoDate,
         };

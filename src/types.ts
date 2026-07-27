@@ -66,7 +66,7 @@ export interface Match {
 }
 
 export interface TicketSettings {
-  algorithm: 'reduction' | 'ev' | 'montecarlo' | 'filters' | 'condorcet';
+  algorithm: 'reduction' | 'ev' | 'montecarlo' | 'filters' | 'condorcet' | 'classic';
   budget: number; // Max combinations
   minVariants: number;
   maxVariants: number;
