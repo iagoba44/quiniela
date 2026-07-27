@@ -33,12 +33,22 @@ export async function enrichMatchesWithNews(matches: Match[]): Promise<Match[]> 
         sancionados: dataAway.sancionados || [] 
       };
       
-      m.trueProbabilities = fuseProbabilities(
-        calculateTrueProbabilities(m.odds),
-        m.statsOdds,
-        m.bajasHome,
-        m.bajasAway
+      
+      const numBajasHome = m.bajasHome.confirmadas.length + m.bajasHome.sancionados.length;
+      const numBajasAway = m.bajasAway.confirmadas.length + m.bajasAway.sancionados.length;
+      const cuotas = [m.odds['1'], m.odds['X'], m.odds['2']];
+      const porcentajesLAE = m.laeProbabilities ? [m.laeProbabilities['1'], m.laeProbabilities['X'], m.laeProbabilities['2']] : [0.33, 0.33, 0.34];
+
+      const { probabilidades, ev } = fuseProbabilities(
+        cuotas as [number, number, number],
+        numBajasHome,
+        numBajasAway,
+        porcentajesLAE as [number, number, number]
       );
+      
+      m.trueProbabilities = { 1: probabilidades[0], X: probabilidades[1], 2: probabilidades[2] };
+      m.ev = { 1: ev[0], X: ev[1], 2: ev[2] };
+  
     } catch (e) {
       console.warn('Error enriching match', m.id, e);
     }
@@ -107,7 +117,7 @@ export async function fetchSELAEData(): Promise<Matchday[]> {
       currentSorteoDate = activeData.fecha_sorteo || activeData.fecha;
       
       const realMatches: Match[] = activeData.partidos.map((p: any, index: number) => {
-        let odds = { 1: 2.50, X: 3.00, 2: 2.50 }; // Mock odds for now fallback
+        let odds = { 1: 2.50, X: 3.00, 2: 2.50 }; // Fallback odds if not found in The Odds API
         
         // Match with realOddsData using Fuzzy Matching
         if (realOddsData.length > 0) {
@@ -136,14 +146,27 @@ export async function fetchSELAEData(): Promise<Matchday[]> {
         } : undefined;
 
         // True probabilities son el resultado de la fusión (stats son más importantes si están disponibles)
-        let trueProbabilities = calculateTrueProbabilities(odds);
-        if (statsOdds) {
-          trueProbabilities = {
-            1: (trueProbabilities[1] * 0.4) + (statsOdds[1] * 0.6),
-            X: (trueProbabilities.X * 0.4) + (statsOdds.X * 0.6),
-            2: (trueProbabilities[2] * 0.4) + (statsOdds[2] * 0.6),
-          };
-        }
+        
+        const laeProbabilities = p.porc1 !== undefined ? {
+          1: p.porc1 / 100,
+          X: p.porcX / 100,
+          2: p.porc2 / 100
+        } : undefined;
+        
+        const numBajasHome = 0;
+        const numBajasAway = 0;
+        const cuotasList = [odds['1'], odds['X'], odds['2']];
+        const porcentajesLAEList = laeProbabilities ? [laeProbabilities['1'], laeProbabilities['X'], laeProbabilities['2']] : [0.33, 0.33, 0.34];
+
+        const fused = fuseProbabilities(
+          cuotasList as [number, number, number],
+          numBajasHome,
+          numBajasAway,
+          porcentajesLAEList as [number, number, number]
+        );
+        
+        const trueProbabilities = { 1: fused.probabilidades[0], X: fused.probabilidades[1], 2: fused.probabilidades[2] };
+        const ev = { 1: fused.ev[0], X: fused.ev[1], 2: fused.ev[2] };
 
         return {
           id: index + 1,
@@ -151,6 +174,8 @@ export async function fetchSELAEData(): Promise<Matchday[]> {
           awayTeam: p.visitante || `Equipo Visitante ${index + 1}`,
           odds,
           statsOdds,
+          laeProbabilities,
+          ev,
           trueProbabilities,
           selections: [],
           date: p.fecha || currentSorteoDate,
@@ -205,7 +230,7 @@ export async function fetchSELAEData(): Promise<Matchday[]> {
                  if (histData && histData.length > 0) {
                    const h = histData[0];
                    const matches: Match[] = h.partidos.map((p: any, index: number) => {
-                     const odds = { 1: 2.50, X: 3.00, 2: 2.50 }; 
+                     const odds = p.cuotas || { 1: 2.50, X: 3.00, 2: 2.50 }; 
                      return {
                         id: index + 1,
                         homeTeam: p.local,

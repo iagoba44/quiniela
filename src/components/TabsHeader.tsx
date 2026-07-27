@@ -1,7 +1,7 @@
 import React from 'react';
-import { LayoutGrid, Newspaper, Settings, Calculator } from 'lucide-react';
+import { LayoutGrid, Newspaper, Settings, Calculator, Activity } from 'lucide-react';
 
-export type TabId = 'general' | 'news' | 'config' | 'generate';
+export type TabId = 'general' | 'news' | 'config' | 'generate' | 'sources';
 
 interface TabsHeaderProps {
   activeTab: TabId;
@@ -14,6 +14,7 @@ export function TabsHeader({ activeTab, onTabChange }: TabsHeaderProps) {
     { id: 'news', label: 'Noticias y Bajas', icon: Newspaper },
     { id: 'config', label: 'Configuración', icon: Settings },
     { id: 'generate', label: 'Generación', icon: Calculator },
+    { id: 'sources', label: 'Fuentes y Estado', icon: Activity },
   ] as const;
 
   return (

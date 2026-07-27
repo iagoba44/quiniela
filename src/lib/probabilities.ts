@@ -13,7 +13,6 @@ export function removeOverroundPower(c1: number, cX: number, c2: number): [numbe
 }
 
 export function calculateTrueProbabilities(odds: Odds): Odds {
-  // Eliminación del overround (margen comercial) mediante Power Method
   const [p1, pX, p2] = removeOverroundPower(odds[1], odds.X, odds[2]);
   
   return {
@@ -23,56 +22,31 @@ export function calculateTrueProbabilities(odds: Odds): Odds {
   };
 }
 
-// Evaluar Esperanza Matemática (EV)
-export function calculateEV(probModelo: number, probLAE: number): number {
-  if (probLAE <= 0) return 0;
-  return probModelo / probLAE;
-}
-
 export function fuseProbabilities(
-  oddsProbs: Odds,
-  statsProbs?: Odds,
-  bajasHome: { confirmadas: string[], sancionados: string[] } = { confirmadas: [], sancionados: [] },
-  bajasAway: { confirmadas: string[], sancionados: string[] } = { confirmadas: [], sancionados: [] }
-): Odds {
-  // Por defecto, si no hay stats, usamos las cuotas como base al 100%
-  // Si hay stats, hacemos 50% cuotas, 30% stats (el otro 20% es penalizaciones)
-  let final1 = oddsProbs[1];
-  let finalX = oddsProbs.X;
-  let final2 = oddsProbs[2];
+  cuotas: [number, number, number], 
+  numBajasLocal: number, 
+  numBajasVisitante: number,
+  porcentajesLAE: [number, number, number]
+) {
+  // 1. Quitar margen comercial (Power Method)
+  let probReales = removeOverroundPower(cuotas[0], cuotas[1], cuotas[2]);
 
-  if (statsProbs) {
-    final1 = (oddsProbs[1] * 0.625) + (statsProbs[1] * 0.375);
-    finalX = (oddsProbs.X * 0.625) + (statsProbs.X * 0.375);
-    final2 = (oddsProbs[2] * 0.625) + (statsProbs[2] * 0.375);
-  }
-
-  // Modificar la función fuseProbabilities matemática para que sume la longitud de los arrays bajas_confirmadas y sancionados.
-  // Aplicar una regla matemática directa: cada baja confirmada resta un 1.5% a la probabilidad base del equipo, con un tope máximo del -8%.
-  const totalOutHome = bajasHome.confirmadas.length + bajasHome.sancionados.length;
-  const homePenalty = Math.min(0.08, totalOutHome * 0.015);
-
-  const totalOutAway = bajasAway.confirmadas.length + bajasAway.sancionados.length;
-  const awayPenalty = Math.min(0.08, totalOutAway * 0.015);
-
-  // Aplicar penalizaciones
-  if (homePenalty > 0) {
-    final1 -= homePenalty;
-    finalX += homePenalty / 2;
-    final2 += homePenalty / 2;
-  }
+  // 2. Aplicar penalizador por bajas (ej: -2% por cada baja confirmada)
+  const PENALIZACION_POR_BAJA = 0.02;
+  probReales[0] = Math.max(0, probReales[0] - (numBajasLocal * PENALIZACION_POR_BAJA));
+  probReales[2] = Math.max(0, probReales[2] - (numBajasVisitante * PENALIZACION_POR_BAJA));
   
-  if (awayPenalty > 0) {
-    final2 -= awayPenalty;
-    finalX += awayPenalty / 2;
-    final1 += awayPenalty / 2;
-  }
+  // Renormalizar para que sumen 1 (100%)
+  const suma = probReales[0] + probReales[1] + probReales[2];
+  probReales = [probReales[0]/suma, probReales[1]/suma, probReales[2]/suma];
 
-  // Normalizar para que sumen 1 siempre
-  const total = final1 + finalX + final2;
+  // 3. Retornar probabilidades junto con el EV para el reductor de boletos
   return {
-    1: Math.max(0.01, final1 / total),
-    X: Math.max(0.01, finalX / total),
-    2: Math.max(0.01, final2 / total)
+    probabilidades: probReales,
+    ev: [
+      probReales[0] / (porcentajesLAE[0] || 1),
+      probReales[1] / (porcentajesLAE[1] || 1),
+      probReales[2] / (porcentajesLAE[2] || 1)
+    ]
   };
 }

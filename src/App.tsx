@@ -4,24 +4,24 @@ import { MatchPanel } from './components/MatchPanel';
 import { ConfigPanel } from './components/ConfigPanel';
 import { ResultsTable } from './components/ResultsTable';
 import { DistributionChart } from './components/DistributionChart';
+import { DashboardSummary } from './components/DashboardSummary';
 import { generateCombinations } from './lib/algorithms';
 import { exportToTXT } from './lib/export';
 import { Trophy, Save, RotateCcw, AlertCircle, RefreshCw } from 'lucide-react';
-import { useLocalStorage } from './lib/useLocalStorage';
+import { useIndexedDB } from './lib/useIndexedDB';
 import { fetchSELAEData, enrichMatchesWithNews } from './lib/api';
 import { TabsHeader, TabId } from './components/TabsHeader';
 import { NewsPanel } from './components/NewsPanel';
 import { GenerationPanel } from './components/GenerationPanel';
-import { DataStatusModal } from './components/DataStatusModal';
+import { SourcesPanel } from './components/SourcesPanel';
 import { BrainCircuit, Activity } from 'lucide-react';
 
 export default function App() {
-  const [matchdays, setMatchdays] = useLocalStorage<Matchday[]>('quiniela-matchdays', []);
-  const [activeMatchdayId, setActiveMatchdayId] = useLocalStorage<string>('quiniela-active-matchday', '');
+  const [matchdays, setMatchdays] = useIndexedDB<Matchday[]>('quiniela-matchdays', []);
+  const [activeMatchdayId, setActiveMatchdayId] = useIndexedDB<string>('quiniela-active-matchday', '');
   const [isLoading, setIsLoading] = useState(true);
   const [isEnriching, setIsEnriching] = useState(false);
-  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>('general');
 
   const loadData = async (forceRefresh = false) => {
@@ -29,9 +29,22 @@ export default function App() {
       setIsLoading(true);
       setError(null);
       const data = await fetchSELAEData();
+      
+      const upcoming = data.find(m => m.status === 'upcoming') || data[data.length - 1];
+      if (upcoming && forceRefresh) {
+         try {
+           setIsEnriching(true);
+           const enrichedMatches = await enrichMatchesWithNews(upcoming.matches);
+           upcoming.matches = enrichedMatches;
+         } catch (e) {
+           console.error(e);
+         } finally {
+           setIsEnriching(false);
+         }
+      }
+      
       setMatchdays(data);
-      if (data.length > 0) {
-        const upcoming = data.find(m => m.status === 'upcoming') || data[data.length - 1];
+      if (upcoming) {
         setActiveMatchdayId(upcoming.id);
       }
     } catch (err: any) {
@@ -69,7 +82,7 @@ export default function App() {
   
   const matches = activeMatchday?.matches || [];
 
-  const [settings, setSettings] = useLocalStorage<TicketSettings>('quiniela-settings', {
+  const [settings, setSettings] = useIndexedDB<TicketSettings>('quiniela-settings', {
     algorithm: 'reduction',
     budget: 96,
     minVariants: 3,
@@ -80,16 +93,16 @@ export default function App() {
     max2: 6,
   });
   
-  const [tickets, setTickets] = useLocalStorage<GeneratedTicket[]>('quiniela-tickets', []);
+  const [tickets, setTickets] = useIndexedDB<GeneratedTicket[]>('quiniela-tickets', []);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const handleUpdateMatch = useCallback((id: number, selections: Selection[]) => {
+  const handleUpdateMatch = useCallback((id: number, updatedMatch: Match) => {
     if (!activeMatchdayId) return;
     setMatchdays(prev => prev.map(md => {
       if (md.id !== activeMatchdayId) return md;
       return {
         ...md,
-        matches: md.matches.map(m => m.id === id ? { ...m, selections } : m)
+        matches: md.matches.map(m => m.id === id ? updatedMatch : m)
       };
     }));
   }, [activeMatchdayId, setMatchdays]);
@@ -212,13 +225,7 @@ export default function App() {
             <span className="px-2 py-1 bg-slate-100 rounded text-slate-600 font-semibold border border-slate-200">APIs:</span>
             <span>Data Oficial: <strong className="text-blue-600">SELAE</strong></span>
             <span>Bajas: <strong className="text-amber-600">Cascada (FF/API-F)</strong></span>
-            <button
-              onClick={() => setIsStatusModalOpen(true)}
-              className="flex items-center gap-1 text-slate-500 hover:text-slate-800 transition-colors px-2 py-1 rounded hover:bg-slate-100"
-            >
-              <Activity className="w-3.5 h-3.5" />
-              <span>Ver Estado</span>
-            </button>
+            
             
             <button
               onClick={enrichData}
@@ -271,6 +278,7 @@ export default function App() {
               <div className="lg:col-span-8 space-y-6">
                 {tickets.length > 0 && (
                   <>
+                    <DashboardSummary tickets={tickets} matches={matches} />
                     <DistributionChart tickets={tickets} matches={matches} />
                     <ResultsTable tickets={tickets} matches={matches} />
                   </>
@@ -278,13 +286,16 @@ export default function App() {
               </div>
             </div>
           )}
+
+          {activeTab === 'sources' && (
+            <div className="animate-in fade-in duration-300">
+              <SourcesPanel />
+            </div>
+          )}
         </div>
       </main>
       
-      <DataStatusModal 
-        isOpen={isStatusModalOpen} 
-        onClose={() => setIsStatusModalOpen(false)} 
-      />
+      
     </div>
   );
 }

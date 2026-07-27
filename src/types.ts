@@ -17,6 +17,8 @@ export interface Match {
   statsOdds?: Odds;
   bajasHome?: { confirmadas: string[], dudas: string[], sancionados: string[] };
   bajasAway?: { confirmadas: string[], dudas: string[], sancionados: string[] };
+  laeProbabilities?: Odds;
+  ev?: Odds;
 }
 
 export interface TicketSettings {

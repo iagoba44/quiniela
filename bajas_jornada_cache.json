@@ -10,5 +10,377 @@
       "sancionados": [],
       "factor_penalizacion": -0.015
     }
+  },
+  "KRISTIANSUND": {
+    "timestamp": 1785159540674,
+    "data": {
+      "equipo": "KRISTIANSUND",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "START": {
+    "timestamp": 1785159541023,
+    "data": {
+      "equipo": "START",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "BRANN": {
+    "timestamp": 1785159541163,
+    "data": {
+      "equipo": "BRANN",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "VALERENGA": {
+    "timestamp": 1785159541301,
+    "data": {
+      "equipo": "VALERENGA",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "SARPSBORG": {
+    "timestamp": 1785159541426,
+    "data": {
+      "equipo": "SARPSBORG",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "HAMKAN": {
+    "timestamp": 1785159541548,
+    "data": {
+      "equipo": "HAMKAN",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "SANDEFJORD": {
+    "timestamp": 1785159541690,
+    "data": {
+      "equipo": "SANDEFJORD",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "BODOGLIMT": {
+    "timestamp": 1785159541813,
+    "data": {
+      "equipo": "BODOGLIMT",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "KFUM OSLO": {
+    "timestamp": 1785159541953,
+    "data": {
+      "equipo": "KFUM OSLO",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "MOLDE": {
+    "timestamp": 1785159542090,
+    "data": {
+      "equipo": "MOLDE",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "AALESUNDS": {
+    "timestamp": 1785159542210,
+    "data": {
+      "equipo": "AALESUNDS",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "VIKING": {
+    "timestamp": 1785159542332,
+    "data": {
+      "equipo": "VIKING",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "ROSENBORG": {
+    "timestamp": 1785159542445,
+    "data": {
+      "equipo": "ROSENBORG",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "FREDRIKSTAD": {
+    "timestamp": 1785159542725,
+    "data": {
+      "equipo": "FREDRIKSTAD",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "VASTERAS": {
+    "timestamp": 1785159542851,
+    "data": {
+      "equipo": "VASTERAS",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "ORGRYTE": {
+    "timestamp": 1785159542968,
+    "data": {
+      "equipo": "ORGRYTE",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "DEGERFORS": {
+    "timestamp": 1785159543084,
+    "data": {
+      "equipo": "DEGERFORS",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "DJURGARDENS": {
+    "timestamp": 1785159543257,
+    "data": {
+      "equipo": "DJURGARDENS",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "KALMAR": {
+    "timestamp": 1785159543379,
+    "data": {
+      "equipo": "KALMAR",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "MJALLBY": {
+    "timestamp": 1785159543500,
+    "data": {
+      "equipo": "MJALLBY",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "SIRIUS": {
+    "timestamp": 1785159543616,
+    "data": {
+      "equipo": "SIRIUS",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "GOTEBORG": {
+    "timestamp": 1785159543798,
+    "data": {
+      "equipo": "GOTEBORG",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "BROMMAPOJKARNA": {
+    "timestamp": 1785159543928,
+    "data": {
+      "equipo": "BROMMAPOJKARNA",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "HAMMARBY": {
+    "timestamp": 1785159544048,
+    "data": {
+      "equipo": "HAMMARBY",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "GAIS": {
+    "timestamp": 1785159544168,
+    "data": {
+      "equipo": "GAIS",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "HALMSTADS": {
+    "timestamp": 1785159544313,
+    "data": {
+      "equipo": "HALMSTADS",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "MALMO": {
+    "timestamp": 1785159544434,
+    "data": {
+      "equipo": "MALMO",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "ELFSBORG": {
+    "timestamp": 1785159544555,
+    "data": {
+      "equipo": "ELFSBORG",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "HACKEN": {
+    "timestamp": 1785159544669,
+    "data": {
+      "equipo": "HACKEN",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "AIK": {
+    "timestamp": 1785159544833,
+    "data": {
+      "equipo": "AIK",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
+  },
+  "Getafe": {
+    "timestamp": 1785161942630,
+    "data": {
+      "equipo": "Getafe",
+      "bajas_confirmadas": [
+        "M3_Baja"
+      ],
+      "dudas": [],
+      "sancionados": [],
+      "factor_penalizacion": -0.015
+    }
   }
 }

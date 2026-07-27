@@ -87,15 +87,28 @@ export const MatchPanel: React.FC<Props> = ({ matches, updateMatch }) => {
                 {/* Probabilidades Netas */}
                 {(['1', 'X', '2'] as const).map((key) => (
                   <td key={`prob-${key}`} className="px-2 py-3 text-center align-middle">
-                    <span className="inline-block px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium">
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="inline-block px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium">
                       {(match.trueProbabilities[key] * 100).toFixed(1)}%
-                    </span>
+                      </span>
+                      {match.ev && match.ev[key] > 1 && (
+                        <span className="text-[10px] text-green-600 font-bold" title="Esperanza Matemática Positiva">
+                          EV: {match.ev[key].toFixed(2)}
+                        </span>
+                      )}
+                    </div>
                   </td>
                 ))}
 
                 {/* Botones de Pronóstico */}
                 <td className="px-4 py-2 align-middle">
-                  <div className="flex justify-center gap-1">
+                  <div className="flex justify-center gap-2 items-center">
+                    {match.result && (
+                       <span className="inline-block px-2 py-1 bg-green-100 text-green-800 rounded font-bold text-xs mr-2" title="Resultado Real">
+                          Res: {match.result}
+                       </span>
+                    )}
+                    <div className="flex justify-center gap-1">
                     {(['1', 'X', '2'] as const).map((sel) => {
                       const isSelected = match.selections.includes(sel);
                       return (
@@ -112,6 +125,7 @@ export const MatchPanel: React.FC<Props> = ({ matches, updateMatch }) => {
                         </button>
                       );
                     })}
+                  </div>
                   </div>
                 </td>
               </tr>
