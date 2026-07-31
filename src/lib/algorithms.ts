@@ -212,13 +212,44 @@ export function generateCombinations(matches: Match[], settings: TicketSettings)
 
 export function runMonteCarloSimulation(tickets: GeneratedTicket[], matches: Match[], simulations = 1000): MonteCarloStats {
   if (tickets.length === 0 || matches.length === 0) {
-    return { mean: 0, stdDev: 0, p10: 0, p90: 0, simulations: 0 };
+    return { 
+      mean: 0, 
+      stdDev: 0, 
+      p10: 0, 
+      p90: 0, 
+      simulations: 0,
+      avgTicketProb: 0,
+      totalSetProb10Plus: 0,
+      guaranteedHits90: 0,
+      categoryWinProbabilities: { 10: 0, 11: 0, 12: 0, 13: 0, 14: 0, 15: 0 },
+      expectedCategoryHits: { 10: 0, 11: 0, 12: 0, 13: 0, 14: 0, 15: 0 },
+      coverageBreakdown: { fijos: 0, dobles: 0, triples: 0 }
+    };
+  }
+
+  // Calculate average ticket probability
+  const sumProbs = tickets.reduce((acc, t) => acc + (t.probability || 0), 0);
+  const avgTicketProb = sumProbs / tickets.length;
+
+  // Calculate coverage breakdown across matches
+  let fijos = 0;
+  let dobles = 0;
+  let triples = 0;
+
+  for (let i = 0; i < matches.length; i++) {
+    const picksForMatch = new Set(tickets.map(t => t.picks[i]).filter(Boolean));
+    if (picksForMatch.size === 1) fijos++;
+    else if (picksForMatch.size === 2) dobles++;
+    else if (picksForMatch.size >= 3) triples++;
   }
 
   const returns: number[] = [];
+  const maxHitsPerSim: number[] = [];
+  const categoryHitsTotal: Record<number, number> = { 10: 0, 11: 0, 12: 0, 13: 0, 14: 0, 15: 0 };
+  const categorySimsAchieved: Record<number, number> = { 10: 0, 11: 0, 12: 0, 13: 0, 14: 0, 15: 0 };
 
   for (let sim = 0; sim < simulations; sim++) {
-    // Generate true match outcomes
+    // Generate true match outcomes based on trueProbabilities
     const outcome: Selection[] = matches.map(m => {
       const rand = Math.random();
       if (rand < m.trueProbabilities['1']) return '1';
@@ -226,20 +257,39 @@ export function runMonteCarloSimulation(tickets: GeneratedTicket[], matches: Mat
       return '2';
     });
 
-    // Check hits for each ticket
-    let totalHitsInSim = 0;
+    let totalWinningTicketsInSim = 0;
+    let maxHitsInSim = 0;
+    const simCategoryCounts: Record<number, number> = { 10: 0, 11: 0, 12: 0, 13: 0, 14: 0, 15: 0 };
+
     tickets.forEach(ticket => {
       let hits = 0;
       for (let i = 0; i < outcome.length; i++) {
         if (ticket.picks[i] === outcome[i]) hits++;
       }
-      if (hits >= 10) totalHitsInSim++;
+      if (hits > maxHitsInSim) maxHitsInSim = hits;
+      if (hits >= 10) {
+        totalWinningTicketsInSim++;
+        if (hits in simCategoryCounts) {
+          simCategoryCounts[hits]++;
+        }
+      }
     });
 
-    returns.push(totalHitsInSim);
+    returns.push(totalWinningTicketsInSim);
+    maxHitsPerSim.push(maxHitsInSim);
+
+    // Track total category hits and win flag
+    for (const cat of [10, 11, 12, 13, 14, 15]) {
+      categoryHitsTotal[cat] += simCategoryCounts[cat] || 0;
+      if (maxHitsInSim >= cat) {
+        categorySimsAchieved[cat]++;
+      }
+    }
   }
 
   returns.sort((a, b) => a - b);
+  maxHitsPerSim.sort((a, b) => a - b);
+
   const sum = returns.reduce((acc, v) => acc + v, 0);
   const mean = sum / simulations;
   const variance = returns.reduce((acc, v) => acc + Math.pow(v - mean, 2), 0) / simulations;
@@ -248,5 +298,28 @@ export function runMonteCarloSimulation(tickets: GeneratedTicket[], matches: Mat
   const p10 = returns[Math.floor(simulations * 0.10)];
   const p90 = returns[Math.floor(simulations * 0.90)];
 
-  return { mean, stdDev, p10, p90, simulations };
+  // Guaranteed hits at 90% confidence floor (10th percentile of maxHitsPerSim)
+  const guaranteedHits90 = maxHitsPerSim[Math.floor(simulations * 0.10)];
+
+  const categoryWinProbabilities: Record<number, number> = {};
+  const expectedCategoryHits: Record<number, number> = {};
+
+  for (const cat of [10, 11, 12, 13, 14, 15]) {
+    categoryWinProbabilities[cat] = (categorySimsAchieved[cat] / simulations) * 100;
+    expectedCategoryHits[cat] = categoryHitsTotal[cat] / simulations;
+  }
+
+  return { 
+    mean, 
+    stdDev, 
+    p10, 
+    p90, 
+    simulations,
+    avgTicketProb,
+    totalSetProb10Plus: categoryWinProbabilities[10] || 0,
+    guaranteedHits90,
+    categoryWinProbabilities,
+    expectedCategoryHits,
+    coverageBreakdown: { fijos, dobles, triples }
+  };
 }

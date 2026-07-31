@@ -94,6 +94,16 @@ export interface MonteCarloStats {
   p10: number;
   p90: number;
   simulations: number;
+  avgTicketProb?: number;
+  totalSetProb10Plus?: number;
+  guaranteedHits90?: number;
+  categoryWinProbabilities?: Record<number, number>; // Probability (%) of achieving >= N hits in at least 1 ticket
+  expectedCategoryHits?: Record<number, number>; // Average number of tickets achieving exactly N hits
+  coverageBreakdown?: {
+    fijos: number;
+    dobles: number;
+    triples: number;
+  };
 }
 
 export interface Matchday {

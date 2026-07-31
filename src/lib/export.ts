@@ -1,4 +1,5 @@
 import { GeneratedTicket } from '../types';
+import { db } from './db';
 
 export function exportToTXT(tickets: GeneratedTicket[]) {
   if (tickets.length === 0) return;
@@ -39,3 +40,48 @@ export function exportToExcel(tickets: GeneratedTicket[]) {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+export async function exportRawServicesToTXT() {
+  try {
+    const res = await fetch('/api/export/raw-services');
+    if (res.ok) {
+      const text = await res.text();
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'datos_servicios_raw.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } else {
+      throw new Error(`HTTP ${res.status}`);
+    }
+  } catch (error) {
+    console.error('Error al exportar servicios raw:', error);
+  }
+}
+
+export async function exportDatabaseToTXT() {
+  try {
+    const res = await fetch('/api/export/db');
+    if (res.ok) {
+      const text = await res.text();
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'database_export.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } else {
+      throw new Error(`HTTP ${res.status}`);
+    }
+  } catch (error) {
+    console.error('Error al exportar base de datos:', error);
+  }
+}
+

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { GeneratedTicket, Match, Selection } from '../types';
+import { runMonteCarloSimulation } from '../lib/algorithms';
 import { 
   TrendingUp, 
   Target, 
@@ -12,7 +13,8 @@ import {
   CheckCircle2, 
   Info,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  ShieldCheck
 } from 'lucide-react';
 
 interface DashboardSummaryProps {
@@ -27,7 +29,7 @@ export function DashboardSummary({ tickets, matches }: DashboardSummaryProps) {
   // Overall Ticket Statistics
   const stats = useMemo(() => {
     if (!tickets.length || !matches.length) {
-      return { avgEv: 0, cost: 0, avgProb: 0, maxEv: 0, totalEvPlusCount: 0 };
+      return { avgEv: 0, cost: 0, avgProb: 0, maxEv: 0, totalEvPlusCount: 0, mcStats: null };
     }
 
     let totalEv = 0;
@@ -67,12 +69,15 @@ export function DashboardSummary({ tickets, matches }: DashboardSummaryProps) {
       });
     });
 
+    const mcStats = runMonteCarloSimulation(tickets, matches, 500);
+
     return {
       avgEv: totalEv / tickets.length,
       maxEv: maxEv,
       avgProb: totalProb / tickets.length,
       cost: tickets.length * 0.75,
-      totalEvPlusCount
+      totalEvPlusCount,
+      mcStats
     };
   }, [tickets, matches]);
 
@@ -151,16 +156,32 @@ export function DashboardSummary({ tickets, matches }: DashboardSummaryProps) {
           </div>
 
           <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:border-slate-300 transition-colors">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
-                <Target className="w-4 h-4" />
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
+                  <Target className="w-4 h-4" />
+                </div>
+                <p className="text-sm font-medium text-slate-500">Prob. Media Boleto</p>
               </div>
-              <p className="text-sm font-medium text-slate-500">Prob. Media Boleto</p>
+              {stats.mcStats && (
+                <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
+                  ≥ {stats.mcStats.guaranteedHits90} aciertos (90%)
+                </span>
+              )}
             </div>
-            <p className="text-2xl font-bold text-slate-800">
-              {(stats.avgProb * 100).toFixed(4)}%
+            <div className="flex items-baseline gap-2">
+              <p className="text-2xl font-bold text-slate-800">
+                {(stats.avgProb * 100).toFixed(4)}%
+              </p>
+              {stats.mcStats?.totalSetProb10Plus !== undefined && (
+                <span className="text-xs font-bold text-emerald-600">
+                  ({stats.mcStats.totalSetProb10Plus.toFixed(1)}% conjunto)
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-slate-400 mt-1">
+              Probabilidad media individual por combinación
             </p>
-            <p className="text-xs text-slate-400 mt-1">Estimación combinada de acierto</p>
           </div>
 
           <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:border-slate-300 transition-colors">

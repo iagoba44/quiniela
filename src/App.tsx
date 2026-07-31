@@ -30,6 +30,19 @@ export default function App() {
       setError(null);
       const data = await fetchSELAEData();
       
+      const upcoming = data.find(m => m.status === 'upcoming') || data[data.length - 1];
+      if (upcoming && forceRefresh) {
+         try {
+           setIsEnriching(true);
+           const enrichedMatches = await enrichMatchesWithNews(upcoming.matches);
+           upcoming.matches = enrichedMatches;
+         } catch (e) {
+           console.error(e);
+         } finally {
+           setIsEnriching(false);
+         }
+      }
+      
       setMatchdays(data);
       if (upcoming) {
         setActiveMatchdayId(upcoming.id);
@@ -211,7 +224,7 @@ export default function App() {
           <div className="text-xs text-slate-500 flex flex-wrap items-center gap-2 font-medium">
             <span className="px-2 py-1 bg-slate-100 rounded text-slate-600 font-semibold border border-slate-200">APIs:</span>
             <span>Data Oficial: <strong className="text-blue-600">SELAE</strong></span>
-            <span>Bajas: <strong className="text-amber-600">API-Football (1 req)</strong></span>
+            <span>Bajas: <strong className="text-amber-600">Cascada (FF/API-F)</strong></span>
             
             
             <button

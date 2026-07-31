@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { CheckCircle, XCircle, Clock, Activity, RefreshCw, Database, Server, AlertTriangle } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Activity, RefreshCw, Database, FileText, Download, AlertTriangle } from 'lucide-react';
 import { db, SourceHealth } from '../lib/db';
+import { exportRawServicesToTXT, exportDatabaseToTXT } from '../lib/export';
 
 const CATEGORY_MAP: Record<string, string[]> = {
   'Partidos': ['SELAE (Próximos)', 'SELAE (Histórico)'],
@@ -93,8 +94,6 @@ export function SourcesPanel() {
 
   useEffect(() => {
     loadHealthFromDB();
-    const interval = setInterval(loadHealthFromDB, 2000);
-    return () => clearInterval(interval);
   }, [loadHealthFromDB]);
 
   const handleManualCheck = async () => {
@@ -106,9 +105,9 @@ export function SourcesPanel() {
       }
       await loadHealthFromDB();
 
-      // Trigger actual pings / fetches where applicable
+      // Trigger actual on-demand refreshes
       try {
-        const selRes = await fetch('/api/selae/proximos');
+        const selRes = await fetch('/api/selae/proximos?refresh=true');
         if (selRes.ok) {
           await db.updateSourceHealth('SELAE (Próximos)', 'success');
         } else {
@@ -119,7 +118,7 @@ export function SourcesPanel() {
       }
 
       try {
-        const oddsRes = await fetch('/api/odds');
+        const oddsRes = await fetch('/api/odds?refresh=true');
         if (oddsRes.ok) {
           await db.updateSourceHealth('The Odds API', 'success');
           await db.updateSourceHealth('Dataradar', 'success');
@@ -187,14 +186,34 @@ export function SourcesPanel() {
             </div>
           </div>
 
-          <button
-            onClick={handleManualCheck}
-            disabled={isRefreshing}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-medium text-sm rounded-xl transition-all shadow-sm"
-          >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            Verificar fuentes ahora
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={handleManualCheck}
+              disabled={isRefreshing}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-medium text-sm rounded-xl transition-all shadow-sm"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Verificar fuentes
+            </button>
+
+            <button
+              onClick={() => exportRawServicesToTXT()}
+              className="inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white font-medium text-sm rounded-xl transition-all shadow-sm"
+              title="Descargar archivo TXT con las respuestas sin procesar de cada API"
+            >
+              <FileText className="w-4 h-4 text-slate-300" />
+              Datos Raw (.txt)
+            </button>
+
+            <button
+              onClick={() => exportDatabaseToTXT()}
+              className="inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-medium text-sm rounded-xl transition-all shadow-sm"
+              title="Descargar volcado completo de IndexedDB y persistencia"
+            >
+              <Download className="w-4 h-4 text-emerald-200" />
+              Exportar BD (.txt)
+            </button>
+          </div>
         </div>
 
         {/* Métricas rápidas */}

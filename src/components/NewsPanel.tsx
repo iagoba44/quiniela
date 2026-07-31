@@ -89,7 +89,7 @@ export function NewsPanel({ matches }: NewsPanelProps) {
 
     fetchRSS();
     loadLocalAlerts();
-  }, []);
+  }, [allTeams.join(',')]);
 
   // Request Notification permission
   const requestNotificationPermission = async () => {
@@ -176,8 +176,13 @@ export function NewsPanel({ matches }: NewsPanelProps) {
       const homeTotal = homeConfirmadas.length + homeSancionados.length + homeDudas.length;
       const awayTotal = awayConfirmadas.length + awaySancionados.length + awayDudas.length;
 
-      const homeImpactScore = Math.min(0.12, (homeConfirmadas.length * 0.035) + (homeSancionados.length * 0.025) + (homeDudas.length * 0.015));
-      const awayImpactScore = Math.min(0.12, (awayConfirmadas.length * 0.035) + (awaySancionados.length * 0.025) + (awayDudas.length * 0.015));
+      const homeImpactScore = m.impactoBajasHome !== undefined 
+        ? Math.abs(m.impactoBajasHome)
+        : Math.min(0.12, (homeConfirmadas.length * 0.035) + (homeSancionados.length * 0.025) + (homeDudas.length * 0.015));
+      
+      const awayImpactScore = m.impactoBajasAway !== undefined
+        ? Math.abs(m.impactoBajasAway)
+        : Math.min(0.12, (awayConfirmadas.length * 0.035) + (awaySancionados.length * 0.025) + (awayDudas.length * 0.015));
 
       const homeFragility: string[] = [];
       if (homeConfirmadas.length >= 2) homeFragility.push('⚠️ Defensa mermada');
